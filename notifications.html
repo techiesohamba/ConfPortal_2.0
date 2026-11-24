@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Notifications - ConfPortal</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    body { background-color: #f8fafc; color: #1e293b; min-height: 100vh; display: flex; flex-direction: column; }
+    header { background: #fff; border-bottom: 1px solid #e2e8f0; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; }
+    .btn { padding: 0.45rem 0.9rem; border-radius: 6px; text-decoration: none; font-size: 0.85rem; cursor: pointer; border: 1px solid #cbd5e1; background: #fff; }
+    .btn-primary { background: #2563eb; color: #fff; border: none; }
+    .container { max-width: 800px; width: 100%; margin: 2rem auto; padding: 0 1rem; flex: 1; }
+    .notif-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
+    .notif-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem; display: flex; gap: 1rem; align-items: flex-start; box-shadow: 0 1px 3px rgba(0,0,0,0.02); }
+    .notif-card.unread { border-left: 4px solid #2563eb; background: #fdfefe; }
+    .notif-icon { background: #eff6ff; color: #2563eb; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; flex-shrink: 0; }
+    .notif-content { flex: 1; }
+    .notif-title { font-size: 1rem; font-weight: 600; color: #0f172a; margin-bottom: 0.25rem; }
+    .notif-message { font-size: 0.875rem; color: #475569; line-height: 1.4; margin-bottom: 0.4rem; }
+    .notif-time { font-size: 0.75rem; color: #94a3b8; }
+  </style>
+</head>
+
+<body>
+
+  <header>
+    <h2>Notifications & Activity</h2>
+    <div style="display: flex; gap: 0.8rem;">
+      <a href="index.html" class="btn">Discover Events</a>
+      <a href="community.html" class="btn">Community Hub</a>
+      <button class="btn" onclick="logoutUser()">Logout</button>
+    </div>
+  </header>
+
+  <div class="container">
+    <div class="notif-header">
+      <h3>Recent Alerts</h3>
+      <button class="btn" onclick="markAllAsRead()">Mark All as Read</button>
+    </div>
+
+    <div id="notifications-list">
+      <!-- Injected dynamically -->
+    </div>
+  </div>
+
+  <script src="js/storage.js"></script>
+  <script>
+    const user = getSessionUser();
+if (!user) {
+  alert("Please sign in to view your notifications.");
+  window.location.href = "auth.html";
+} else {
+  document.addEventListener("DOMContentLoaded", renderNotifications);
+}
+    
+
+    function renderNotifications() {
+      const db = getDB();
+      const list = document.getElementById("notifications-list");
+      
+      // Filter notifications intended for everyone (targetUserId: null) or specifically for this user
+      const userNotifs = (db.notifications || []).filter(
+        n => n.targetUserId === null || n.targetUserId === user.id
+      );
+
+      list.innerHTML = "";
+      if (userNotifs.length === 0) {
+        list.innerHTML = `<p style="text-align: center; color: #94a3b8; padding: 3rem;">You have no notifications at this time.</p>`;
+        return;
+      }
+
+      userNotifs.forEach(n => {
+        const isRead = n.readBy && n.readBy.includes(user.id);
+        const card = document.createElement("div");
+        card.className = `notif-card ${!isRead ? "unread" : ""}`;
+
+        card.innerHTML = `
+          <div class="notif-icon">🔔</div>
+          <div class="notif-content">
+            <div class="notif-title">${n.title}</div>
+            <div class="notif-message">${n.message}</div>
+            <div class="notif-time">${n.timestamp}</div>
+          </div>
+        `;
+        list.appendChild(card);
+      });
+    }
+
+    function markAllAsRead() {
+      const db = getDB();
+      if (!db.notifications) return;
+
+      db.notifications.forEach(n => {
+        if (!n.readBy) n.readBy = [];
+        if (!n.readBy.includes(user.id)) {
+          n.readBy.push(user.id);
+        }
+      });
+
+      saveDB(db);
+      renderNotifications();
+    }
+
+    document.addEventListener("DOMContentLoaded", renderNotifications);
+  </script>
+</body>
+</html>
