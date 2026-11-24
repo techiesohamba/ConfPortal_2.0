@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>My Registered Conferences</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    body { background-color: #f8fafc; color: #1e293b; min-height: 100vh; display: flex; flex-direction: column; }
+    header { background: #fff; border-bottom: 1px solid #e2e8f0; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; }
+    .btn { padding: 0.4rem 0.8rem; border-radius: 4px; text-decoration: none; font-size: 0.85rem; cursor: pointer; border: 1px solid #cbd5e1; background: #fff; }
+    .btn-danger { background: #fee2e2; color: #b91c1c; border: none; }
+    .container { max-width: 900px; width: 100%; margin: 2rem auto; padding: 0 1rem; flex: 1; }
+    .ticket-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 1.5rem; margin-bottom: 1rem; display: flex; justify-content: space-between; align-items: center; }
+    .ticket-pass { background: #f1f5f9; padding: 0.5rem 1rem; border-radius: 6px; font-family: monospace; font-weight: 700; color: #2563eb; }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h2>My Registered Conferences</h2>
+    <div style="display: flex; gap: 0.8rem; align-items: center;">
+      <a href="index.html" class="btn">Explore More</a>
+      <button class="btn btn-danger" onclick="logoutUser()">Logout</button>
+    </div>
+  </header>
+
+  <div class="container" id="bookings-list">
+    <!-- Injected dynamically -->
+  </div>
+
+  <script src="js/storage.js"></script>
+  <script>
+    const user = getSessionUser();
+    if (!user) window.location.href = "auth.html";
+
+    function renderMyBookings() {
+      const db = getDB();
+      const myBookings = db.bookings.filter(b => b.userId === user.id);
+      const container = document.getElementById("bookings-list");
+
+      if (myBookings.length === 0) {
+        container.innerHTML = `<p style="text-align: center; color: #94a3b8; padding: 3rem;">You haven't registered for any conferences yet. <a href="index.html" style="color: #2563eb;">Browse upcoming events</a>.</p>`;
+        return;
+      }
+
+      container.innerHTML = "";
+      myBookings.forEach(booking => {
+        const conf = db.conferences.find(c => c.id === booking.conferenceId);
+        if (!conf) return;
+
+        const card = document.createElement("div");
+        card.className = "ticket-card";
+        card.innerHTML = `
+          <div>
+            <h3 style="margin-bottom: 0.3rem;">${conf.title}</h3>
+            <p style="font-size: 0.85rem; color: #64748b;">🗓️ ${conf.date} &bull; ${conf.time} &bull; 📍 ${conf.venue}</p>
+            <p style="font-size: 0.85rem; color: #64748b; margin-top: 0.3rem;">Speaker: <strong>${conf.speakerName || "TBD"}</strong></p>
+          </div>
+          <div style="text-align: right;">
+            <div class="ticket-pass">${booking.ticketCode || "CONF-PASS"}</div>
+            <button class="btn btn-danger" style="margin-top: 0.6rem;" onclick="cancelMyTicket(${conf.id})">Cancel</button>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    function cancelMyTicket(confId) {
+      if (!confirm("Cancel your registration for this event?")) return;
+      const db = getDB();
+      db.bookings = db.bookings.filter(b => !(b.conferenceId === confId && b.userId === user.id));
+      saveDB(db);
+      renderMyBookings();
+    }
+
+    document.addEventListener("DOMContentLoaded", renderMyBookings);
+  </script>
+</body>
+</html>

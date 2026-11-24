@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Conferences - Discover & Book</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+    body {
+      background-color: #f8fafc;
+      color: #1e293b;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    header {
+      background: #ffffff;
+      border-bottom: 1px solid #e2e8f0;
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+    .brand {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: #2563eb;
+      text-decoration: none;
+    }
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      flex-wrap: wrap;
+    }
+    .btn {
+      padding: 0.45rem 0.85rem;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      font-weight: 500;
+      text-decoration: none;
+      cursor: pointer;
+      border: 1px solid transparent;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+    }
+    .btn-outline {
+      border-color: #cbd5e1;
+      color: #334155;
+      background: #fff;
+    }
+    .btn-outline:hover {
+      background: #f1f5f9;
+    }
+    .btn-primary {
+      background-color: #2563eb;
+      color: #fff;
+    }
+    .btn-primary:hover {
+      background-color: #1d4ed8;
+    }
+    .btn-danger {
+      background-color: #fee2e2;
+      color: #b91c1c;
+    }
+    .btn-disabled {
+      background-color: #e2e8f0 !important;
+      color: #94a3b8 !important;
+      cursor: not-allowed !important;
+    }
+    .notif-badge {
+      background: #ef4444;
+      color: white;
+      font-size: 0.7rem;
+      padding: 0.1rem 0.4rem;
+      border-radius: 9999px;
+      font-weight: 700;
+    }
+    .container {
+      max-width: 1200px;
+      width: 100%;
+      margin: 2rem auto;
+      padding: 0 1rem;
+      flex: 1;
+    }
+    .hero {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+    .hero h1 {
+      font-size: 2rem;
+      color: #0f172a;
+      margin-bottom: 0.5rem;
+    }
+    .hero p {
+      color: #64748b;
+    }
+    .controls-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      background: #fff;
+      padding: 1rem;
+      border-radius: 8px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+      margin-bottom: 2rem;
+    }
+    .search-input {
+      flex: 2;
+      min-width: 200px;
+      padding: 0.6rem 0.8rem;
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      outline: none;
+      font-size: 0.95rem;
+    }
+    .filter-select {
+      flex: 1;
+      min-width: 150px;
+      padding: 0.6rem 0.8rem;
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      outline: none;
+      font-size: 0.95rem;
+      background: #fff;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 1.5rem;
+    }
+    .conf-card {
+      background: #ffffff;
+      border-radius: 8px;
+      padding: 1.5rem;
+      border: 1px solid #e2e8f0;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      transition: transform 0.15s ease;
+    }
+    .conf-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    }
+    .conf-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 0.75rem;
+    }
+    .conf-title {
+      font-size: 1.15rem;
+      font-weight: 600;
+      color: #0f172a;
+    }
+    .badge {
+      display: inline-block;
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+    .badge-upcoming { background: #dbeafe; color: #1e40af; }
+    .badge-completed { background: #e2e8f0; color: #475569; }
+    .badge-cancelled { background: #fee2e2; color: #b91c1c; }
+    .conf-meta {
+      font-size: 0.85rem;
+      color: #475569;
+      margin-bottom: 0.4rem;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    .capacity-bar-container {
+      margin: 1rem 0;
+    }
+    .capacity-text {
+      font-size: 0.8rem;
+      color: #64748b;
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 0.3rem;
+    }
+    .capacity-track {
+      height: 6px;
+      background: #e2e8f0;
+      border-radius: 3px;
+      overflow: hidden;
+    }
+    .capacity-fill {
+      height: 100%;
+      background: #3b82f6;
+      border-radius: 3px;
+      transition: width 0.3s;
+    }
+    .capacity-fill.full {
+      background: #ef4444;
+    }
+    .btn-full {
+      width: 100%;
+      text-align: center;
+    }
+    .ticket-modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.5);
+      justify-content: center;
+      align-items: center;
+      z-index: 100;
+    }
+    .ticket-content {
+      background: #fff;
+      padding: 2rem;
+      border-radius: 8px;
+      max-width: 440px;
+      width: 90%;
+      text-align: center;
+    }
+    .ticket-code {
+      margin: 1.5rem 0;
+      padding: 1rem;
+      background: #f1f5f9;
+      border: 2px dashed #94a3b8;
+      border-radius: 6px;
+      font-family: monospace;
+      font-size: 1.2rem;
+      font-weight: 700;
+      letter-spacing: 2px;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <a href="index.html" class="brand">ConfPortal</a>
+    <div class="nav-actions" id="nav-actions">
+      <!-- Injected dynamically based on session status -->
+    </div>
+  </header>
+
+  <div class="container">
+    <div class="hero">
+      <h1>Explore Upcoming Conferences</h1>
+      <p>Discover expert-led keynotes, technical workshops, and claim your seat.</p>
+    </div>
+
+    <!-- Filter and Search Controls -->
+    <div class="controls-bar">
+      <input type="text" id="search-input" class="search-input" placeholder="Search conference by title or speaker..." />
+      <select id="status-filter" class="filter-select">
+        <option value="All">All Statuses</option>
+        <option value="Upcoming">Upcoming</option>
+        <option value="Completed">Past / Completed</option>
+      </select>
+    </div>
+
+    <!-- Conferences Card Grid -->
+    <div class="grid" id="conferences-grid">
+      <!-- Populated dynamically -->
+    </div>
+  </div>
+  <div class="nav-actions" id="nav-actions">
+  <!-- Injected dynamically based on session status -->
+</div>
+The buttons are meant to be injected by `js/attendee.js` via `updateNavBar()`. If `updateNavBar()` in your `js/attendee.js` still contains the older version, it only renders:
+```javascript
+<a href="auth.html" class="btn btn-primary">Sign In</a>
+
+  <!-- Booking Confirmation Modal -->
+  <div id="ticket-modal" class="ticket-modal">
+    <div class="ticket-content">
+      <h3 style="color: #16a34a; margin-bottom: 0.5rem;">Registration Confirmed!</h3>
+      <p style="font-size: 0.9rem; color: #475569;" id="ticket-event-name"></p>
+      <div class="ticket-code" id="ticket-code">CONF-XXXXX</div>
+      <p style="font-size: 0.8rem; color: #64748b; margin-bottom: 1.5rem;">
+        Keep this confirmation ID for check-in at the venue.
+      </p>
+      <button class="btn btn-primary" onclick="closeTicketModal()">Done</button>
+    </div>
+  </div>
+
+  <script src="js/storage.js"></script>
+  <script src="js/attendee.js"></script>
+</body>
+</html>
